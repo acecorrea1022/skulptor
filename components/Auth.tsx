@@ -1,12 +1,12 @@
 import React from 'react'
 import { Text, View } from 'react-native'
 
-const Pluh = () => {
+const Auth = () => {
   return (
     <View>
-      <Text>Pluh</Text>
+      <Text>Auth</Text>
     </View>
   )
 }
 
-export default Pluh
+export default Auth

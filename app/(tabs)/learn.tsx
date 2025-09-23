@@ -1,12 +1,12 @@
 import React from 'react'
 import { Text, View } from 'react-native'
 
-const Pluh = () => {
+const learn = () => {
   return (
     <View>
-      <Text>Pluh</Text>
+      <Text>learn</Text>
     </View>
   )
 }
 
-export default Pluh
+export default learn

@@ -1,12 +1,12 @@
 import React from 'react'
 import { Text, View } from 'react-native'
 
-const Pluh = () => {
+const profile = () => {
   return (
     <View>
-      <Text>Pluh</Text>
+      <Text>profile</Text>
     </View>
   )
 }
 
-export default Pluh
+export default profile
