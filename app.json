@@ -46,7 +46,8 @@
             "./assets/fonts/Rubik-Regular.ttf"
           ]
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

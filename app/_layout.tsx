@@ -5,11 +5,37 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import './global.css';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { SplashScreenController } from '@/components/splash-screen-controller';
+import { useAuthContext } from '@/hooks/use-auth-context';
+import { useColorScheme } from '@/hooks/useColorScheme'; // keep your existing hook
+import AuthProvider from '@/providers/auth-providers';
 import { useFonts } from 'expo-font';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
+
+// Separate navigator so we can access auth context
+function RootNavigator() {
+  const { isLoggedIn } = useAuthContext();
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      {/* Protected (signed-in) area */}
+      <Stack.Protected guard={isLoggedIn}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="settings" />
+      </Stack.Protected>
+
+      {/* Public (signed-out) area */}
+      <Stack.Protected guard={!isLoggedIn}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+
+      <Stack.Screen name="+not-found" options={{ headerShown: false }} />
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -24,33 +50,36 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (error) throw error;
-    if (fontsLoaded) SplashScreen.hideAsync();
-  }, [fontsLoaded, error]);
-
-  if (!fontsLoaded) return null;
+    // Splash is hidden by SplashScreenController once auth is also ready
+  }, [error]);
 
   const base = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
-  const navTheme = {
-    ...base,
-    colors: {
-      ...base.colors,
-      background: 'transparent',
-      card: 'transparent',
-      border: 'rgba(255,255,255,0.10)',
-      text: '#ECEDEE',
-      primary: '#d81b60',
-    },
-  };
+  const navTheme = useMemo(
+    () => ({
+      ...base,
+      colors: {
+        ...base.colors,
+        background: 'transparent',
+        card: 'transparent',
+        border: 'rgba(255,255,255,0.10)',
+        text: '#ECEDEE',
+        primary: '#d81b60',
+      },
+    }),
+    [base]
+  );
+
+  // Avoid flashing content before fonts are loaded
+  if (!fontsLoaded) return null;
 
   return (
     <ThemeProvider value={navTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="settings" />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="light" />
+      <AuthProvider>
+        {/* Hide splash ONLY when fonts AND auth are ready */}
+        <SplashScreenController ready={fontsLoaded} />
+        <RootNavigator />
+        <StatusBar style="light" />
+      </AuthProvider>
     </ThemeProvider>
   );
 }
